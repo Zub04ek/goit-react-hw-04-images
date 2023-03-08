@@ -1,22 +1,20 @@
-import { Component } from "react";
+import { useState } from "react";
 import toast from 'react-hot-toast';
 import { Button, Header, Input, SearchForm } from "./Searchbar.styled";
 import { BsSearch } from "react-icons/bs";
 import PropTypes from 'prop-types';
 
-export class Searchbar extends Component {
-    state = {
-        searchQuery: '',
+export const Searchbar = ({onSubmit}) => {
+    const [searchQuery, setSearchQuery] = useState('');
+
+    const handleChange = e => {
+        setSearchQuery(e.currentTarget.value.toLowerCase());
     };
 
-    handleChange = e => {
-        this.setState({ searchQuery: e.currentTarget.value.toLowerCase() });
-    };
-
-    handleSubmit = e => {
+    const handleSubmit = e => {
         e.preventDefault();
 
-        if (this.state.searchQuery.trim() === '') {
+        if (searchQuery.trim() === '') {
            return toast(`Please enter a word for searching!`, {
                     style: {
                         borderRadius: '10px',
@@ -26,13 +24,12 @@ export class Searchbar extends Component {
                 });
         }
 
-        this.props.onSubmit(this.state.searchQuery);
+        onSubmit(searchQuery);
     }
 
-    render() {
         return (
             <Header>
-                <SearchForm onSubmit={this.handleSubmit}>
+                <SearchForm onSubmit={handleSubmit}>
                     <Button type="submit">
                         <BsSearch />
                     </Button>
@@ -43,13 +40,12 @@ export class Searchbar extends Component {
                         autoFocus
                         placeholder="Search images and photos"
                         name="searchQuery"
-                        value={this.state.searchQuery}
-                        onChange={this.handleChange}
+                        value={searchQuery}
+                        onChange={handleChange}
                     />
                 </SearchForm>
             </Header>
         )
-    }
 }
 
 Searchbar.propTypes = {
