@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 
 const modalRoot = document.querySelector('#modal-root');
 
-export const Modal = ({onClose, children}) => {
+export const Modal = ({onClose, largeImg}) => {
     useEffect(() => {
         const handleKeyDown = e => {
             e.code === 'Escape' && onClose();
@@ -25,15 +25,14 @@ export const Modal = ({onClose, children}) => {
         return createPortal(
             <Backdrop onClick={handleBackdropClick}>
                 <Content>
-                    {children}
+                    <img src={largeImg} alt={largeImg} width="800" />
                 </Content>
             </Backdrop>,
             modalRoot,
         )
-    
 }
 
 Modal.propTypes = {
     onClose: PropTypes.func.isRequired,
-    children: PropTypes.node,
+    largeImg: PropTypes.string.isRequired,
 };

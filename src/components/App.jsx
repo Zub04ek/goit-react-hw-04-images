@@ -6,7 +6,6 @@ import { ImageGallery } from "./ImageGallery/ImageGallery";
 import { Searchbar } from "./Searchbar/Searchbar";
 import { Button } from "components/LoadMoreBtn/LoadMoreBtn";
 import { Loader } from "components/Loader/Loader";
-import { Modal } from "components/Modal/Modal";
 import { fetchImages, limit } from "helpers/api";
 
 export const App = () => {
@@ -14,8 +13,6 @@ export const App = () => {
   const [pictures, setPictures] = useState([]);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
-  const [showModal, setShowModal] = useState(false);
-  const [largeImg, setLargeImg] = useState('');
   const [totalImages, setTotalImages] = useState(0);
 
   const handleSubmit = newSearchQuery => {
@@ -75,15 +72,6 @@ export const App = () => {
     setPage(page => page + 1 );
   }
   
-  const openModal = (e) => {
-    setShowModal(showModal => !showModal);
-    setLargeImg( e.currentTarget.alt);
-  }
-
-  const closeModal = () => {
-    setShowModal(showModal => !showModal);
-  }
-
     return (
     <Container>
         <GlobalStyles />
@@ -92,12 +80,7 @@ export const App = () => {
           reverseOrder={false}
         />
         <Searchbar onSubmit={handleSubmit} />
-        <ImageGallery pictures={pictures} openModal={openModal} />
-        {showModal &&
-                    <Modal onClose={closeModal}>
-                        <img src={largeImg} alt={largeImg} width="800" />
-                    </Modal>
-                }
+        {pictures.length > 0 && <ImageGallery pictures={pictures} />}
         {loading && <Loader />}
         {hasMorePages && totalImages > limit && <Button onClick={handleLoad}/>}
     </Container>

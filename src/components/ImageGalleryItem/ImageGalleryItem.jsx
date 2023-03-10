@@ -1,7 +1,7 @@
 import { Image, Item } from "./ImageGalleryItem.styled";
 import PropTypes from 'prop-types';
 
-export const ImageGalleryItem = ({images, onClick}) => {
+export const ImageGalleryItem = ({ images, onClick }) => {
     return images.map(({ id, webformatURL, largeImageURL }) => (
         <Item key={id}>
             <Image src={webformatURL} alt={largeImageURL} onClick={onClick} />
@@ -17,5 +17,5 @@ ImageGalleryItem.propTypes = {
             largeImageURL: PropTypes.string.isRequired
       })
     ).isRequired,
-    onClick: PropTypes.func.isRequired
+    onClick: PropTypes.func.isRequired,
 };
