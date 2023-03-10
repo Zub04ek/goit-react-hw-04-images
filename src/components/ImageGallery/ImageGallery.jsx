@@ -3,11 +3,11 @@ import { List } from "./ImageGallery.styled";
 import PropTypes from 'prop-types';
 
 export const ImageGallery = ({pictures, openModal}) => {
-        return (
-                <List>
-                    <ImageGalleryItem images={pictures} onClick={openModal} />
-                </List>
-        )
+    return (
+        <List>
+            <ImageGalleryItem images={pictures} onClick={openModal} />
+        </List>
+    )
 }
 
 ImageGallery.propTypes = {

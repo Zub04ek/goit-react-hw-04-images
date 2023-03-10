@@ -1,4 +1,4 @@
-import { Component } from "react";
+import { useEffect, useMemo, useState } from "react";
 import toast, { Toaster } from 'react-hot-toast';
 import { Container } from "./Container.styled";
 import { GlobalStyles } from "./Global.styled";
@@ -9,72 +9,80 @@ import { Loader } from "components/Loader/Loader";
 import { Modal } from "components/Modal/Modal";
 import { fetchImages, limit } from "helpers/api";
 
-export class App extends Component {
-  state = {
-    searchQuery: '',
-    pictures: [],
-    page: 1,
-    loading: false,
-    showModal: false,
-    largeImg: '',
-    totalImages: 0,
-  };
+export const App = () => {
+  const [searchQuery, setSearchQuery] = useState('');
+  const [pictures, setPictures] = useState([]);
+  const [page, setPage] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [largeImg, setLargeImg] = useState('');
+  const [totalImages, setTotalImages] = useState(0);
 
-  handleSubmit = newSearchQuery => {
-    this.state.searchQuery !== newSearchQuery && this.setState({ searchQuery: newSearchQuery, page: 1, pictures: [], totalImages: 0 });
-  }
-
-  async componentDidUpdate(prevProps, prevState) { 
-       try {
-           if (prevState.searchQuery !== this.state.searchQuery
-               || prevState.page !== this.state.page) {
-               
-             this.setState({ loading: true });
-             
-             const { hits, totalHits } = await fetchImages(this.state.searchQuery.trim(), this.state.page);
-             
-             if (hits.length === 0) {
-                    this.setState({ loading: false, pictures: [], totalImages: 0 });
-                    return toast.error(`Nothing found for ${this.state.searchQuery}!`);
-               };
-
-                this.setState({
-                    pictures: [...this.state.pictures, ...hits],
-                    loading: false,
-                    totalImages: totalHits,
-                });
-           };
-        } catch (err) {
-            console.log(err);
-       };
-  };
-  
-  handleLoad = () => {
-        this.setState(prev => ({ page: prev.page + 1 }));
-  }
-  
-  compareTotalPages = () => {
-    const totalPages = this.state.totalImages / limit;
-    const restTotalPages = this.state.pictures.length / limit;
-    return totalPages > restTotalPages;
-  }
-  
-  openModal = (e) => {
-        this.setState(({ showModal }) => ({
-            showModal: !showModal,
-        }));
-        this.setState({ largeImg: e.currentTarget.alt });
+  const handleSubmit = newSearchQuery => {
+    if (newSearchQuery.trim() === '') {
+      setPictures([]);
+      toast(`Please enter a word for searching!`, {
+        style: {
+          borderRadius: '10px',
+          background: '#333',
+          color: '#fff',
+        },
+      });
     }
 
-  closeModal = () => {
-        this.setState(({ showModal }) => ({
-            showModal: !showModal,
-        }));
+    if (searchQuery !== newSearchQuery) {
+      setSearchQuery(newSearchQuery);
+      setPage(1);
+      setPictures([]);
+      setTotalImages(0);
+    }
+  };
+
+  useEffect(() => {
+    if (searchQuery.trim() === '') {
+      return;
+    }
+    const fetchPictures = async () => {
+      setLoading(true);
+      try {
+        const { hits, totalHits } = await fetchImages(searchQuery.trim(), page);
+
+        if (hits.length === 0) {
+          setLoading(false);
+          setPictures([]);
+          setTotalImages(0);
+          return toast.error(`Nothing found for ${searchQuery}!`);
+        };
+
+        setPictures(prevPictures => [...prevPictures, ...hits]);
+        setLoading(false);
+        setTotalImages(totalHits);
+
+      } catch (err) {
+        console.log(err);
+      };
+    }
+    fetchPictures();
+  }, [searchQuery, page]);
+
+  const hasMorePages = useMemo(() => {
+    const totalPages = totalImages / limit;
+    const restTotalPages = pictures.length / limit;
+    return totalPages > restTotalPages;
+  }, [pictures, totalImages]);
+  
+  const handleLoad = () => {
+    setPage(page => page + 1 );
+  }
+  
+  const openModal = (e) => {
+    setShowModal(showModal => !showModal);
+    setLargeImg( e.currentTarget.alt);
   }
 
-  render() {
-    const { pictures, loading, showModal, largeImg, totalImages } = this.state;
-    const hasMorePages = this.compareTotalPages();
+  const closeModal = () => {
+    setShowModal(showModal => !showModal);
+  }
 
     return (
     <Container>
@@ -83,16 +91,15 @@ export class App extends Component {
           position="top-right"
           reverseOrder={false}
         />
-        <Searchbar onSubmit={this.handleSubmit} />
-        <ImageGallery pictures={pictures} openModal={this.openModal} />
+        <Searchbar onSubmit={handleSubmit} />
+        <ImageGallery pictures={pictures} openModal={openModal} />
         {showModal &&
-                    <Modal onClose={this.closeModal}>
+                    <Modal onClose={closeModal}>
                         <img src={largeImg} alt={largeImg} width="800" />
                     </Modal>
                 }
         {loading && <Loader />}
-        {hasMorePages && totalImages > limit && <Button onClick={this.handleLoad}/>}
+        {hasMorePages && totalImages > limit && <Button onClick={handleLoad}/>}
     </Container>
   );
-  }
 };
